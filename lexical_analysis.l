@@ -1,4 +1,8 @@
 %{
+#include <stdio.h>
+#include "parser.tab.h"
+
+int linenum = 1;
 %}
 
 %%
@@ -12,13 +16,25 @@
 (?i:END) {return(KEY_END);}
 
 \"(\\.|[^"\\])*\" {printf("%s is a string\n", yytext);}
-[0-9]+ {printf("%s is a number\n", yytext);}
 
-[Ss]+[ ] {printf("%s is a declaration\n", yytext);}
-[_]?[A-Za-z][0-9A-Za-z-]* {printf("%s is an identifier\n", yytext);}
+[0-9]+ {
+		yylval.intValue = atoi(yytext);
+		return(NUMBER); 
+		}
+
+[Ss]+[ ] {
+			sscanf(yytext, "s", yylval.name);
+			return(DECLARATION);}
+
+[_]?[A-Za-z][0-9A-Za-z-]* {
+							sscanf(yytext, "s", yylval.name);
+							return(IDENTIFIER);
+							}
 
 [;] {return(CONCATENATOR);}
 [.] {return(TERMINATOR);}
+
+[\n] {linenum++;}
 [\t ]+ {}
 
 . {printf("unrecognised token %s\n", yytext);}
