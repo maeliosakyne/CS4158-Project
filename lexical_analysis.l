@@ -39,11 +39,4 @@ int linenum = 1;
 
 . {printf("unrecognised token %s\n", yytext);}
 %%
- 
-int yywrap(){}
-int main(){
- 
-yylex();
- 
-return 0;
-}
+
