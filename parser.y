@@ -35,6 +35,10 @@ int ptr = 0;
 
 %type <name> IDENTIFIER
 %type <name> DECLARATION
+%type <list> input_list
+%type <list> output_list
+%type <variable_list> variable_declarations
+
 %%
 
 program: KEY_START TERMINATOR variable_declarations 
@@ -52,12 +56,12 @@ var_dec:
 		flag = search($2);
 		
 			if(flag == -1){
-		int size = strlen($1);
-		insertVar($2, size, "0");
-	}else{
-		t = "Identifier already defined - ";
-		yyerror2(3,t, $2);
-	}
+        int size = strlen($2);
+        insertVar($2, size, "0");
+    }else{
+        char *t = "Identifier already defined - ";
+        yyerror2(3,t, $2);
+    }
 }
 ;
 
@@ -122,7 +126,6 @@ KEY_ADD NUMBER KEY_TO IDENTIFIER
 	}
 	| KEY_MOVE NUMBER KEY_TO IDENTIFIER 
 	{
-		int temp;
 		int flag;
 		
 		flag = search($4);
