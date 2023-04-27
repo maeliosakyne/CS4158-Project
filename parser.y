@@ -3,8 +3,13 @@
 #include <stdio.h>
 #include <string.h>
 
+extern int linenum;
+int yylex();
+
 int search(char name[]);
 void insertVar(char name[], int size, char value[]);
+void insertVal(char value[], int posi);
+
 int yyerror(char *s);
 void yyerror2(int type, char *s, char b[]);
 
@@ -61,15 +66,106 @@ statement_list:
 ;
 
 statement:
-	KEY_ADD expression {}
-	| KEY_MOVE expression {}
+
+KEY_ADD NUMBER KEY_TO IDENTIFIER  
+	{
+		int temp;
+		int flag;
+		
+		flag = search($4);
+		
+		if(flag == -1) {
+			char *t = "Identifier not defined - ";
+			yyerror2(3,t, $4);
+		} else {
+			temp = atoi(tab[flag].value);
+			temp = temp + $2;
+			
+			char val[15];
+			val = sprintf(val, "%d%, temp);
+			
+			insertVal(val, flag);
+		}
+	}
+	| KEY_ADD IDENTIFIER KEY_TO IDENTIFIER 
+	{
+		int temp;
+		int temp2;
+		int flag;
+		int flag2;
+		
+		flag = search($2);
+		flag2 = search($4);
+		
+		if(flag == -1) {
+		
+			char *t = "Identifier not defined - ";
+			yyerror2(3,t, $2);
+			
+		} else if(flag2 == -1) {
+		
+			char *t = "Identifier not defined - ";
+			yyerror2(3, t, $4);
+			
+		} else {
+		
+			temp = atoi(tab[flag].value);
+			temp2 = atoi(tab[flag2].value);
+			
+			temp = temp + temp2;
+			
+			char val[15];
+			sprintf(val, "%d", temp);
+			
+			insertVal(val, flag2);
+		}
+	}
+	| KEY_MOVE NUMBER KEY_TO IDENTIFIER 
+	{
+		int temp;
+		int flag;
+		
+		flag = search($4);
+		
+		if(flag == -1) {
+			char *t = "Identifier not defined - ";
+			yyerror2(3,t, $4);
+		} else {
+			
+			char val[15];
+			val = sprintf(val, "%d%, $2);
+			
+			insertVal(val, flag);
+		}
+	}
+	| KEY_MOVE IDENTIFIER KEY_TO IDENTIFIER 
+	{
+		int temp;
+		int temp2;
+		int flag;
+		int flag2;
+		
+		flag = search($2);
+		flag2 = search($4);
+		
+		if(flag == -1) {
+		
+			char *t = "Identifier not defined - ";
+			yyerror2(3,t, $2);
+			
+		} else if(flag2 == -1) {
+		
+			char *t = "Identifier not defined - ";
+			yyerror2(3, t, $4);
+			
+		} else {
+		
+			insertVal(tab[flag].value, flag2);
+			
+		}
+	}
 	| input_statement {}
 	| output_statement {}
-;
-
-expression:
-	NUMBER KEY_TO IDENTIFIER
-	| IDENTIFIER KEY_TO IDENTIFIER
 ;
 
 input_statement:
@@ -126,6 +222,7 @@ output_list:
 		$$->items[$1->size] = $3.item;
 		$$->types[$1->size] = $3.type;
 	}
+
 %%
 
 int search(char name[]){
@@ -144,6 +241,7 @@ int search(char name[]){
 
 }
 
+
 void insertVar(char name[], int size, char value[]) {
 	
 	strcpy(tab[ptr].name, name);
@@ -151,6 +249,19 @@ void insertVar(char name[], int size, char value[]) {
 	tab[ptr].size = size;
 	
 	ptr++;
+}
+
+void insertVal(char value[], int posi){
+	
+	if(strlen(value) <= tab[posi].size)) {
+	
+		strcpy(tab[posi].value, value);
+		
+	} else {
+		char *t = "Value too large for variable - ";
+		yyerror2(3, t, tab[posi].name);
+	}
+
 }
 
 int yyerror(char *s)
@@ -161,7 +272,7 @@ int yyerror(char *s)
 
 void yyerror2(int type, char *s, char b[])
 {
-	//todo change print to file
+	
 	switch(type){
 		case 1:
 			printf("Syntax Error on line - %d\n%s\n",linenum, s);
@@ -175,4 +286,10 @@ void yyerror2(int type, char *s, char b[])
 	}
 
 	exit(0);
+}
+
+int main()
+{
+    yyparse();
+    return 0;
 }
