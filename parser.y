@@ -51,14 +51,14 @@ var_dec:
 		int flag;
 		flag = search($2);
 		
-		if(flag == -1){
-			int size = strlen($1);
-			insertVar($2, size, "0");
-		}else{
-			t = "Identifier already defined - ";
-			yyerror2(3,t, $2);
-		}
+			if(flag == -1){
+		int size = strlen($1);
+		insertVar($2, size, "0");
+	}else{
+		t = "Identifier already defined - ";
+		yyerror2(3,t, $2);
 	}
+}
 ;
 
 statement_list:
@@ -66,7 +66,8 @@ statement_list:
 ;
 
 statement:
-	KEY_ADD NUMBER KEY_TO IDENTIFIER  
+
+KEY_ADD NUMBER KEY_TO IDENTIFIER  
 	{
 		int temp;
 		int flag;
@@ -163,7 +164,64 @@ statement:
 			
 		}
 	}
+	| input_statement {}
+	| output_statement {}
 ;
+
+input_statement:
+	KEY_INPUT input_list {
+		// Loop over the list of variables to read input into
+		for(int i = 0; i < $2.size; i++) {
+			char input[20];
+			scanf("%s", input);
+			insertVar($2.vars[i], strlen(input), input);
+		}
+	}
+;
+
+input_list:
+	IDENTIFIER {
+		$$ = (struct variable_list*)malloc(sizeof(struct variable_list));
+		$$->vars[0] = $1;
+		$$->size = 1;
+	}
+	| input_list ';' IDENTIFIER {
+		$$ = $1;
+		$$->vars[$1->size] = $3;
+		$$->size++;
+	}
+;
+
+output_statement:
+	KEY_PRINT output_list {
+		// Loop over the list of items to print
+		for(int i = 0; i < $2.size; i++) {
+			if($2.types[i] == 'S') {
+				printf("%s", $2.items[i]);
+			} else {
+				int index = search($2.items[i]);
+				if(index == -1) {
+					yyerror2(3, "Undefined variable - ", $2.items[i]);
+				} else {
+					printf("%s", tab[index].value);
+				}
+			}
+		}
+	}
+;
+
+output_list:
+	output_item {
+		$$ = (struct output_list*)malloc(sizeof(struct output_list));
+		$$->items[0] = $1.item;
+		$$->types[0] = $1.type;
+		$$->size = 1;
+	}
+	| output_list CONCATENATOR output_item {
+		$$ = $1;
+		$$->items[$1->size] = $3.item;
+		$$->types[$1->size] = $3.type;
+	}
 
 %%
 
