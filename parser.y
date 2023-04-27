@@ -82,7 +82,7 @@ KEY_ADD NUMBER KEY_TO IDENTIFIER
 			temp = temp + $2;
 			
 			char val[15];
-			val = sprintf(val, "%d%, temp);
+			val = sprintf(val, "%d", temp);
 			
 			insertVal(val, flag);
 		}
@@ -133,7 +133,7 @@ KEY_ADD NUMBER KEY_TO IDENTIFIER
 		} else {
 			
 			char val[15];
-			val = sprintf(val, "%d%, $2);
+			val = sprintf(val, "%d", $2);
 			
 			insertVal(val, flag);
 		}
