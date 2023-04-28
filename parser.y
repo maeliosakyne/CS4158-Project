@@ -203,20 +203,17 @@ input_list:
 
 output_statement:
 	KEY_PRINT output_list {
-		// Loop over the list of items to print
-		for(int i = 0; i < $2.size; i++) {
+			// Loop over the list of items to print
+			for(int i = 0; i < $2.size; i++) {
 			if($2.types[i] == 'S') {
-				printf("%s", $2.items[i]);
 			} else {
-				int index = search($2.items[i]);
-				if(index == -1) {
-					yyerror2(3, "Undefined variable - ", $2.items[i]);
-				} else {
-					printf("%s", tab[index].value);
-				}
+			int index = search($2.items[i]);
+			if(index == -1) {
+			yyerror2(3, "Undefined variable - ", $2.items[i]);
 			}
 		}
 	}
+}
 ;
 
 output_list:
