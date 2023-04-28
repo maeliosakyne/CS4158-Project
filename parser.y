@@ -31,13 +31,19 @@ int ptr = 0;
 %union {
 	char name[20];
 	int intValue;
+	char *output_item;
 }
+
 
 %type <name> IDENTIFIER
 %type <name> DECLARATION
 %type <list> input_list
 %type <list> output_list
+%type <variable> NUMBER
+%type <output_item> output_item
 %type <variable_list> variable_declarations
+
+
 
 %%
 
@@ -215,15 +221,20 @@ output_statement:
 
 output_list:
 	output_item {
-		$$ = (struct output_list*)malloc(sizeof(struct output_list));
-		$$->items[0] = $1.item;
-		$$->types[0] = $1.type;
-		$$->size = 1;
+		$$ = (struct output_list*) malloc(sizeof(struct output_list));
+		$$->items = (char **) malloc(sizeof(char *));
+		$$->types = (int *) malloc(sizeof(int));
+		$$->items[0] = $1.output_item;
+		$$->types[0] = $1.intValue;
+		$$->size0 = 1;
 	}
 	| output_list CONCATENATOR output_item {
 		$$ = $1;
-		$$->items[$1->size] = $3.item;
-		$$->types[$1->size] = $3.type;
+		$$->items = (char **) realloc($$->items, ($1->size0 + 1) * sizeof(char *));
+		$$->types = (int *) realloc($$->types, ($1->size0 + 1) * sizeof(int));
+		$$->items[$1->size0] = $3.output_item;
+		$$->types[$1->size0] = $3.intValue;
+		$$->size0 += 1;
 	}
 
 %%
